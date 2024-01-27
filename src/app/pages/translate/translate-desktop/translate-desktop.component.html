@@ -1,4 +1,4 @@
-<ion-header [translucent]="true">
+<ion-header [translucent]="true" *ngIf="globalFeatureFlagService.getEnableAppHeader()">
   <ion-toolbar>
     <ion-buttons slot="primary">
       <ntkme-github-button user="sign" repo="translate" [count]="true" size="large" />
@@ -9,7 +9,7 @@
 
 <ion-content [fullscreen]="true">
   <div class="container">
-    <div id="input-mode-group">
+    <div id="input-mode-group" *ngIf="globalFeatureFlagService.getEnableTranslationButton()">
       <ng-container *ngIf="spokenToSigned">
         <app-translate-input-button mode="text" icon="language"></app-translate-input-button>
       </ng-container>
@@ -32,6 +32,6 @@
       </div>
     </app-drop-pose-file>
 
-    <app-send-feedback />
+    <app-send-feedback *ngIf="globalFeatureFlagService.getEnableFeedbackButton()" />
   </div>
 </ion-content>

@@ -9,6 +9,7 @@ import {Observable} from 'rxjs';
 import {TranslationService} from '../../../modules/translate/translate.service';
 import {BaseComponent} from '../../../components/base/base.component';
 import {takeUntil, tap} from 'rxjs/operators';
+import {GlobalFeatureFlagService} from 'src/app/features/services/feature-control-flag.service';
 
 @Component({
   selector: 'app-language-selectors',
@@ -23,7 +24,11 @@ export class LanguageSelectorsComponent extends BaseComponent implements OnInit 
 
   @HostBinding('class.spoken-to-signed') spokenToSigned: boolean;
 
-  constructor(private store: Store, public translation: TranslationService) {
+  constructor(
+    private store: Store,
+    public translation: TranslationService,
+    public globalFeatureFlagService: GlobalFeatureFlagService
+  ) {
     super();
     this.spokenToSigned$ = this.store.select<boolean>(state => state.translate.spokenToSigned);
     this.spokenLanguage$ = this.store.select<string>(state => state.translate.spokenLanguage);
