@@ -19,10 +19,10 @@ const routes: Routes = [
       //   path: 'avatars',
       //   loadChildren: () => import('./tab3/tab3.module').then(m => m.Tab3PageModule),
       // },
-      {
-        path: 'settings',
-        loadChildren: () => import('./settings/settings.module').then(m => m.SettingsPageModule),
-      },
+      // {
+      //   path: 'settings',
+      //   loadChildren: () => import('./settings/settings.module').then(m => m.SettingsPageModule),
+      // },
       {path: 'translate', pathMatch: 'full', redirectTo: ''},
     ],
   },
