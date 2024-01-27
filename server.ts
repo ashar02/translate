@@ -2,12 +2,14 @@ import 'zone.js/node';
 import * as dotenv from 'dotenv';
 
 import {APP_BASE_HREF} from '@angular/common';
-import {Express} from 'express';
+import { Express, Request, Response, NextFunction } from 'express';
 import {existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {CommonEngine} from '@angular/ssr';
 import {AppServerModule} from './src/main.server';
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 
 dotenv.config();
 
@@ -54,12 +56,37 @@ export function app(): Express {
 }
 
 function run(): void {
-  const port = process.env['PORT'] || 4000;
+  const httpPort = process.env['HTTP_PORT'] || 80;
+  const httpsPort = process.env['HTTPS_PORT'] || 443;
 
-  // Start up the Node server
-  const server = app();
-  server.listen(port, () => {
-    console.log(`Node Express server listening on http://localhost:${port}`);
+  // Load your SSL certificates
+  const privateKey = fs.readFileSync('cert/key.pem', 'utf8');
+  const certificate = fs.readFileSync('cert/cert.pem', 'utf8');
+  const credentials = { key: privateKey, cert: certificate };
+
+  if (httpPort !== httpsPort) {
+    // Create HTTP server
+    const httpServer = express();
+    httpServer.use((req: Request, res: Response, next: NextFunction) => {
+      if (req.secure) {
+        next();
+      } else {
+        res.redirect(`https://${req.headers.host}:${httpsPort}${req.url}`);
+      }
+    });
+
+    // Start up the HTTP server
+    httpServer.listen(httpPort, () => {
+      console.log(`Node Express server listening on http://localhost:${httpPort}`);
+    });
+  }
+
+  // Create an HTTPS server
+  const httpsServer = https.createServer(credentials, app());
+
+  // Start up the HTTPS server
+  httpsServer.listen(httpsPort, () => {
+    console.log(`Node Express server listening on https://localhost:${httpsPort}`);
   });
 }
 
