@@ -1,4 +1,5 @@
 import 'zone.js/node';
+import * as dotenv from 'dotenv';
 
 import {APP_BASE_HREF} from '@angular/common';
 import {Express} from 'express';
@@ -7,6 +8,8 @@ import {join} from 'node:path';
 import {CommonEngine} from '@angular/ssr';
 import {AppServerModule} from './src/main.server';
 const express = require('express');
+
+dotenv.config();
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): Express {
