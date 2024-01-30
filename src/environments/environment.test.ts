@@ -17,6 +17,17 @@ export const environment = {
   },
   reCAPTCHAKey: '',
   initialNavigation: 'enabledNonBlocking' as InitialNavigation,
+  features: {
+    appHeader: false,
+    appFooter: false,
+    translationButton: false,
+    languageSwapButton: false,
+    languageDetectionButton: false,
+    signedLanguageViewSelector: false,
+    feedbackButton: false,
+    textLanguages: ['en'],
+    signedLanguages: ['ase', 'csl', 'pks'],
+  },
 };
 
 /*

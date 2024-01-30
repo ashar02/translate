@@ -12,6 +12,7 @@ import {
 } from '../../../../modules/translate/translate.actions';
 import {BaseComponent} from '../../../../components/base/base.component';
 import {Capacitor} from '@capacitor/core';
+import {GlobalFeatureFlagService} from 'src/app/features/services/feature-control-flag.service';
 
 @Component({
   selector: 'app-signed-language-output',
@@ -27,7 +28,7 @@ export class SignedLanguageOutputComponent extends BaseComponent implements OnIn
   safeVideoUrl: SafeUrl;
   isSharingSupported: boolean;
 
-  constructor(private store: Store, private domSanitizer: DomSanitizer) {
+  constructor(private store: Store, private domSanitizer: DomSanitizer, public globalFeatureFlagService: GlobalFeatureFlagService) {
     super();
 
     this.poseViewerSetting$ = this.store.select<PoseViewerSetting>(state => state.settings.poseViewer);

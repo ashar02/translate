@@ -7,6 +7,7 @@
   (languageChange)="setSignedLanguage($event)"></app-language-selector>
 
 <ion-button
+  *ngIf="globalFeatureFlagService.getEnableLanguageSwapButton()"
   (click)="swapLanguages()"
   id="swap-languages"
   fill="clear"
@@ -19,7 +20,7 @@
 </ion-button>
 
 <app-language-selector
-  [hasLanguageDetection]="spokenToSigned"
+  [hasLanguageDetection]="globalFeatureFlagService.getEnableLanguageDetectionButton() ? spokenToSigned : false"
   [languages]="translation.spokenLanguages"
   [language]="spokenLanguage$ | async"
   translationKey="languages"

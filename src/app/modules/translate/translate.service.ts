@@ -3,6 +3,7 @@ import {delay, from, Observable, of, switchMap} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 import {AppCheck} from '../../core/helpers/app-check/app-check';
+import {GlobalFeatureFlagService} from 'src/app/features/services/feature-control-flag.service';
 
 @Injectable({
   providedIn: 'root',
@@ -165,7 +166,14 @@ export class TranslationService {
     'zu',
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private globalFeatureFlagService: GlobalFeatureFlagService) {
+    if (globalFeatureFlagService.getSignedLanguages().length > 0) {
+      this.signedLanguages = globalFeatureFlagService.getSignedLanguages();
+    }
+    if (globalFeatureFlagService.getTextLanguages().length > 0) {
+      this.spokenLanguages = globalFeatureFlagService.getTextLanguages();
+    }
+  }
 
   normalizeSpokenLanguageText(language: string, text: string): Observable<string> {
     const params = new URLSearchParams();

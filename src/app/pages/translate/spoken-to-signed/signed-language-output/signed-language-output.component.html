@@ -21,7 +21,7 @@
   <ng-template #noPose></ng-template>
 </ng-template>
 
-<div class="actions-row" *ngIf="pose$ | async as pose">
+<div class="actions-row" *ngIf="globalFeatureFlagService.getEnableSignLanguageViewSelector() && (pose$ | async) as pose">
   <ng-container *ngIf="videoUrl; else spinner">
     <ion-button
       class="circle-icon"

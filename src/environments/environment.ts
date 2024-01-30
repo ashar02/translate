@@ -17,6 +17,17 @@ export const environment = {
   },
   reCAPTCHAKey: '6Ldsxb8oAAAAAGyUZbyd0QruivPSudqAWFygR-4t',
   initialNavigation: 'enabledBlocking' as InitialNavigation,
+  features: {
+    appHeader: false,
+    appFooter: false,
+    translationButton: false,
+    languageSwapButton: false,
+    languageDetectionButton: false,
+    signedLanguageViewSelector: false,
+    feedbackButton: false,
+    textLanguages: ['en'],
+    signedLanguages: ['ase', 'csl', 'pks'],
+  },
 };
 
 /*
