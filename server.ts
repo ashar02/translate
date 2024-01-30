@@ -60,8 +60,8 @@ function run(): void {
   const httpsPort = process.env['HTTPS_PORT'] || 443;
 
   // Load your SSL certificates
-  const privateKey = fs.readFileSync('cert/key.pem', 'utf8');
-  const certificate = fs.readFileSync('cert/cert.pem', 'utf8');
+  const privateKey = fs.readFileSync('/etc/letsencrypt/live/translate.deaftawk.com/privkey.pem', 'utf8');
+  const certificate = fs.readFileSync('/etc/letsencrypt/live/translate.deaftawk.com/fullchain.pem', 'utf8');
   const credentials = { key: privateKey, cert: certificate };
 
   if (httpPort !== httpsPort) {
