@@ -9,7 +9,7 @@ export const environment = {
     storageBucket: 'sign-mt.appspot.com',
     messagingSenderId: '665830225099',
     appId: '1:665830225099:web:18e0669d5847a4b047974e',
-    measurementId: 'G-1LXY5W5Z9H',
+    measurementId: 'G-KEZV2TK7R6',
   },
   reCAPTCHAKey: '6Ldsxb8oAAAAAGyUZbyd0QruivPSudqAWFygR-4t',
   initialNavigation: 'enabledBlocking' as InitialNavigation,
