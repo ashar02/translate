@@ -58,10 +58,12 @@ export function app(): Express {
 function run(): void {
   const httpPort = process.env['HTTP_PORT'] || 80;
   const httpsPort = process.env['HTTPS_PORT'] || 443;
+  const privateKeyPath = process.env['PRIVATE_KEY_PATH'] || 'cert/key.pem';
+  const certificatePath = process.env['CERTIFICATE_PATH'] || 'cert/cert.pem';
 
   // Load your SSL certificates
-  const privateKey = fs.readFileSync('/etc/letsencrypt/live/translate.deaftawk.com/privkey.pem', 'utf8');
-  const certificate = fs.readFileSync('/etc/letsencrypt/live/translate.deaftawk.com/fullchain.pem', 'utf8');
+  const privateKey = fs.readFileSync(privateKeyPath, 'utf8');
+  const certificate = fs.readFileSync(certificatePath, 'utf8');
   const credentials = { key: privateKey, cert: certificate };
 
   if (httpPort !== httpsPort) {

@@ -121,7 +121,9 @@ export class PlayableVideoEncoder {
       timestamp: (ms * index) / this.fps,
       duration: ms / this.fps,
     });
-    this.videoEncoder.encode(frame);
+    if (this.videoEncoder) {
+      this.videoEncoder.encode(frame);
+    }
     frame.close();
   }
 

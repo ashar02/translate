@@ -6,7 +6,7 @@ import * as fs from 'fs';
 @Injectable({providedIn: 'root'})
 export class TranslocoFileSystemLoader implements TranslocoLoader {
   getTranslation(langPath: string): Observable<Translation> {
-    const fName = langPath.toLowerCase();
+    const fName = langPath;
     const content = String(fs.readFileSync(`${__dirname}/../browser/assets/i18n/${fName}.json`));
     return of(JSON.parse(content));
   }
