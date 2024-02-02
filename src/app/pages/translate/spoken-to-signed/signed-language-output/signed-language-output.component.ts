@@ -50,10 +50,6 @@ export class SignedLanguageOutputComponent extends BaseComponent implements OnIn
       .subscribe();
   }
 
-  shareIcon(): string {
-    return isIOS || isMacLike ? 'share-outline' : 'share-social-outline';
-  }
-
   copyTranslation(): void {
     this.store.dispatch(CopySignedLanguageVideo);
   }
