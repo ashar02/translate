@@ -1,4 +1,8 @@
 import * as admin from 'firebase-admin';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
 admin.initializeApp({
   projectId: process.env.GOOGLE_CLOUD_PROJECT,
   databaseURL: 'https://sign-mt-default-rtdb.firebaseio.com/',
