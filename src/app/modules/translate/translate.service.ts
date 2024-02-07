@@ -3,11 +3,13 @@ import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 import {GlobalFeatureFlagService} from 'src/app/features/services/feature-control-flag.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TranslationService {
+  baseUrl = environment.apiBaseUrl;
   signedLanguages = [
     'ase',
     'gsg',
@@ -178,13 +180,13 @@ export class TranslationService {
     const params = new URLSearchParams();
     params.set('lang', language);
     params.set('text', text);
-    const url = 'https://sign.mt/api/text-normalization?' + params.toString();
+    const url = `${this.baseUrl}/api/text-normalization?${params.toString()}`;
 
     return this.http.get<{text: string}>(url).pipe(map(response => response.text));
   }
 
   describeSignWriting(fsw: string): Observable<string> {
-    const url = 'https://sign.mt/api/signwriting-description';
+    const url = `${this.baseUrl}/api/signwriting-description`;
 
     return this.http
       .post<{result: {description: string}}>(url, {data: {fsw}})
