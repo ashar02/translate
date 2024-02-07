@@ -4,7 +4,6 @@ import {PoseViewerSetting} from '../../../../modules/settings/settings.state';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {Store} from '@ngxs/store';
 import {takeUntil, tap} from 'rxjs/operators';
-import {isIOS, isMacLike} from '../../../../core/constants';
 import {
   CopySignedLanguageVideo,
   DownloadSignedLanguageVideo,
@@ -13,6 +12,7 @@ import {
 import {BaseComponent} from '../../../../components/base/base.component';
 import {Capacitor} from '@capacitor/core';
 import {GlobalFeatureFlagService} from 'src/app/features/services/feature-control-flag.service';
+import {getMediaSourceClass} from '../../pose-viewers/playable-video-encoder';
 
 @Component({
   selector: 'app-signed-language-output',
@@ -73,7 +73,12 @@ export class SignedLanguageOutputComponent extends BaseComponent implements OnIn
     const res = await fetch(this.videoUrl);
     const blob = await res.blob();
 
-    const mediaSource = new MediaSource();
+    const mediaSourceClass = getMediaSourceClass();
+    if (!mediaSourceClass) {
+      return null;
+    }
+
+    const mediaSource = new mediaSourceClass();
     mediaSource.addEventListener('sourceopen', async () => {
       const sourceBuffer = mediaSource.addSourceBuffer(blob.type);
       sourceBuffer.addEventListener('updateend', () => {
@@ -97,6 +102,7 @@ export class SignedLanguageOutputComponent extends BaseComponent implements OnIn
     if (!video.srcObject) {
       // Fallback behavior to make sure the browser can play the video
       this.safeVideoUrl = null;
+      video.disableRemotePlayback = true; // Disable AirPlay, must be used for ManagedMediaSource
       video.srcObject = await this.createVideoMediaSource();
     }
   }
