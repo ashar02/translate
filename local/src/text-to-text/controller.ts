@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as httpErrors from 'http-errors';
-import * as crypto from 'crypto';
+//import * as crypto from 'crypto';
 import {TextToTextTranslationModel} from './model/model';
 import {FirebaseDatabase, Reference} from '@firebase/database-types';
 
@@ -8,25 +8,26 @@ const TRANSLATION_DIRECTIONS = new Set(['spoken-to-signed', 'signed-to-spoken'])
 
 export class TextToTextTranslationEndpoint {
   models = new Map<string, TextToTextTranslationModel>();
-
+  // @ts-ignore
   constructor(private database: FirebaseDatabase | null) {}
 
   async modelFiles(direction: string, from: string, to: string): Promise<string[] | null> {
-    const query = {prefix: `models/browsermt/${direction}/${from}-${to}`};
-    const [files] = await this.bucket.getFiles(query);
-    const paths = files.map(f => f.metadata.name as string).filter(p => !p.endsWith('/'));
-    return paths.length > 0 ? paths : null;
+    // const query = {prefix: `models/browsermt/${direction}/${from}-${to}`};
+    //const [files] = await this.bucket.getFiles(query);
+    //const paths = files.map(f => f.metadata.name as string).filter(p => !p.endsWith('/'));
+    //return paths.length > 0 ? paths : null;
+    return null;
   }
 
-  private async getModel(direction: string, from: string, to: string): Promise<TextToTextTranslationModel> {
-    const modelName = `${from}-${to}`;
+  //private async getModel(direction: string, from: string, to: string): Promise<TextToTextTranslationModel | null> {
+    /*const modelName = `${from}-${to}`;
     if (!this.models.has(modelName)) {
       const files = await this.modelFiles(direction, from, to);
       let model: TextToTextTranslationModel;
       if (files) {
         console.log('Initializing Model', {direction, from, to});
-        model = new TextToTextTranslationModel(this.bucket, from, to);
-        await model.init(files);
+        //model = new TextToTextTranslationModel(this.bucket, from, to);
+        //await model.init(files);
       } else {
         const [newFrom, newTo] = direction.split('-to-');
         if (newFrom === from && newTo === to) {
@@ -37,8 +38,8 @@ export class TextToTextTranslationEndpoint {
 
       this.models.set(modelName, model);
     }
-    return this.models.get(modelName)!;
-  }
+    return this.models.get(modelName)!;*/
+  //}
 
   private parseParameters(req: express.Request) {
     const direction = req.params.direction as string;
@@ -59,11 +60,11 @@ export class TextToTextTranslationEndpoint {
     return {direction, from, to, text};
   }
 
-  async getCachedTranslation(direction: string, from: string, to: string, text: string): Promise<string | Reference> {
-    const hash = crypto.createHash('md5').update(text).digest('hex');
-    const ref = this.database.ref('translations').child(direction).child(`${from}-${to}`).child(hash);
+  async getCachedTranslation(direction: string, from: string, to: string, text: string): Promise<string | Reference | null> {
+    //const hash = crypto.createHash('md5').update(text).digest('hex');
+    //const ref = this.database.ref('translations').child(direction).child(`${from}-${to}`).child(hash);
 
-    return new Promise(async resolve => {
+    /*return new Promise(async resolve => {
       let result = ref;
       await ref.transaction(cache => {
         if (!cache) {
@@ -79,7 +80,8 @@ export class TextToTextTranslationEndpoint {
         };
       });
       resolve(result);
-    });
+    });*/
+    return null;
   }
 
   async request(req: express.Request, res: express.Response) {
@@ -89,28 +91,28 @@ export class TextToTextTranslationEndpoint {
     console.log('Requesting', {direction, from, to, text});
 
     const cache = await this.getCachedTranslation(direction, from, to, text);
-    let translation: string;
+    //let translation: string;
     if (typeof cache === 'string') {
-      translation = cache;
+      //translation = cache;
     } else {
-      const model = await this.getModel(direction, from, to);
-      translation = await model.translate(text, from, to);
-      await cache.set({
-        text,
-        translation,
-        counter: 1,
-        timestamp: Date.now(),
-      });
+      //const model = await this.getModel(direction, from, to);
+      //translation = await model.translate(text, from, to);
+      //await cache.set({
+      //  text,
+      //  translation,
+      //  counter: 1,
+      //  timestamp: Date.now(),
+      //});
     }
 
-    const response = {
+    /*const response = {
       direction,
       from,
       to,
       text: translation,
     };
     res.json(response);
-    console.log('Response', response);
+    console.log('Response', response);*/
   }
 }
 

@@ -16,6 +16,7 @@
   "main": "src/index.ts",
   "dependencies": {
     "@firebase/database-types": "^1.0.1",
+    "@google-cloud/storage": "^7.7.0",
     "@sign-mt/browsermt": "0.2.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
