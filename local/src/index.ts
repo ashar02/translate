@@ -6,6 +6,7 @@ import {prerenderFunction} from './prerender/controller';
 // import {textToTextFunction} from './text-to-text/controller';
 import {logConsoleMemory} from './utils/memory';
 import {textNormalizationFunction} from './text-normalization/controller';
+import {signwritingDescriptionFunction} from './signwriting-description/controller';
 import https from 'https';
 import fs from 'fs';
 
@@ -15,6 +16,7 @@ const privateKeyPath = process.env.PRIVATE_KEY_PATH || 'cert/key.pem';
 const certificatePath = process.env.CERTIFICATE_PATH || 'cert/cert.pem';
 
 const app = express();
+app.use(express.json());
 const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(errorMiddleware);
@@ -23,6 +25,7 @@ app.options('*', (req, res) => res.status(200).end());
 app.use('/translate/prerender', prerenderFunction);
 // app.use('/api/spoken-to-signed', textToTextFunction);
 app.use('/api/text-normalization', textNormalizationFunction);
+app.use('/api/signwriting-description', signwritingDescriptionFunction);
 
 const httpsServer = https.createServer({
   key: fs.readFileSync(privateKeyPath),
