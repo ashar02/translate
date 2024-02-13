@@ -1,4 +1,5 @@
-import {Injectable} from '@angular/core';
+import {Injectable, PLATFORM_ID, Inject} from '@angular/core';
+import {isPlatformBrowser} from '@angular/common';
 import {getCLS, getFID, getLCP} from 'web-vitals';
 //import {FirebaseAnalytics} from '@capacitor-firebase/analytics';
 //import {FirebasePerformance} from '@capacitor-firebase/performance';
@@ -22,9 +23,11 @@ declare global {
 export class GoogleAnalyticsService {
   traces: {name: string; time: number}[] = [];
 
-  constructor() {
-    this.initializeGoogleAnalytics();
-    this.logPerformanceMetrics();
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    if (isPlatformBrowser(this.platformId)) {
+      this.initializeGoogleAnalytics();
+      this.logPerformanceMetrics();
+    }
   }
 
   get isSupported() {
