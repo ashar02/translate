@@ -1,5 +1,6 @@
 import express from 'express';
 import * as dotenv from 'dotenv';
+import cors from 'cors';
 import {errorMiddleware} from './middlewares/error.middleware';
 import {prerenderFunction} from './prerender/controller';
 // import {textToTextFunction} from './text-to-text/controller';
@@ -17,6 +18,7 @@ const certificatePath = process.env.CERTIFICATE_PATH || 'cert/cert.pem';
 const app = express();
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
+app.use(cors());
 app.use(errorMiddleware);
 
 app.use('/translate/prerender', prerenderFunction);
