@@ -1,59 +1,55 @@
 import * as express from 'express';
 import * as httpErrors from 'http-errors';
-import {FirebaseDatabase, Reference} from '@firebase/database-types';
 import {appCheckVerification} from '../middlewares/appcheck.middleware';
 import { PythonShell } from 'python-shell';
 import * as path from 'path';
+import mongoose, {Document} from 'mongoose';
+
+const SignwritingDescriptionSchema = new mongoose.Schema({
+  fsw: String,
+  description: String,
+  counter: Number,
+  timestamp: Date
+});
+
+interface SignwritingDescriptionDocument extends Document {
+  fsw: string;
+  description: string;
+  counter: number;
+  timestamp: Date;
+}
+
+const SignwritingDescriptionModel = mongoose.model('SignwritingDescription', SignwritingDescriptionSchema);
 
 export class SignwritingDescriptionEndpoint {
-  constructor(private database: FirebaseDatabase | null) {}
-
   private parseParameters(req: express.Request) {
     if (!req.body || !req.body.data) {
       throw new httpErrors.BadRequest('Missing data in request body');
     }
 
     const data = req.body.data as {fsw: string};
-
     if (!data || !data.fsw) {
       throw new httpErrors.BadRequest('Missing "fsw" data in request body');
     }
 
     const fsw = data.fsw;
-
     return {fsw};
   }
 
-
-  getDBRef(fsw: string): Reference | null {
-    if (!this.database) {
-      return null;
-    }
-    return this.database.ref('normalizations').child(fsw);
+  private async getDBRef(fsw: string): Promise<SignwritingDescriptionDocument | null> {
+    return SignwritingDescriptionModel.findOne({fsw}) as Promise<SignwritingDescriptionDocument | null>;
   }
 
-  async getCached(fsw: string): Promise<string | Reference | null> {
-    const ref = this.getDBRef(fsw);
-
-    return new Promise(async resolve => {
-      let result: string | Reference | null = null;
-      if (ref) {
-        await ref.transaction(cache => {
-          if (!cache) {
-            return null;
-          }
-
-          console.log('Cache hit', cache);
-          result = cache.output;
-          return {
-            ...cache,
-            counter: cache.counter + 1,
-            timestamp: Date.now(),
-          };
-        });
-      }
-      resolve(result || null);
-    });
+  async getCached(fsw: string): Promise<string | null> {
+    const cache = await this.getDBRef(fsw);
+    if (cache) {
+      console.log('Cache hit', cache);
+      cache.counter++;
+      cache.timestamp = new Date();
+      await cache.save();
+      return cache.description;
+    }
+    return null;
   }
 
   async getDescription(fsw: string): Promise<string | null> {
@@ -89,25 +85,13 @@ export class SignwritingDescriptionEndpoint {
     } else {
       output = await this.getDescription(fsw);
       // Set cache for the input-output mapping
-      if (cache && output) {
-        await cache.set({
-          input: fsw,
-          output,
+      if (output) {
+        await SignwritingDescriptionModel.create({
+          fsw,
+          description: output,
           counter: 1,
-          timestamp: Date.now(),
+          timestamp: new Date(),
         });
-        // Set cache for the output as well, to map to itself
-        if (output) {
-          const dbRef = this.getDBRef(fsw);
-          if (dbRef) {
-            await dbRef.set({
-              input: output,
-              output,
-              counter: 0,
-              timestamp: Date.now(),
-            });
-          }
-        }
       }
     }
 
@@ -122,6 +106,6 @@ export class SignwritingDescriptionEndpoint {
 }
 
 export const signwritingDescriptionFunction = express.Router();
-const endpoint = new SignwritingDescriptionEndpoint(null);
+const endpoint = new SignwritingDescriptionEndpoint();
 signwritingDescriptionFunction.use(appCheckVerification);
 signwritingDescriptionFunction.post('/', endpoint.request.bind(endpoint));
