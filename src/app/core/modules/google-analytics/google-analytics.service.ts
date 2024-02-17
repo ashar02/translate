@@ -9,7 +9,9 @@ function isPromise(promise) {
   return !!promise && typeof promise.then === 'function';
 }
 
-declare var gtag: Function;
+function gtag(...args) {
+  window.dataLayer.push(arguments);
+}
 
 declare global {
   interface Window {
@@ -43,9 +45,6 @@ export class GoogleAnalyticsService {
       document.head.appendChild(script);
       // Initialize Google Analytics with the custom Measurement ID
       window.dataLayer = window.dataLayer || [];
-      function gtag(...args: any[]) {
-        window.dataLayer.push(arguments);
-      }
       gtag('js', new Date());
       gtag('config', environment.firebase.measurementId1);
     }
