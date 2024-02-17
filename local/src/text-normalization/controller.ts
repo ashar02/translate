@@ -2,12 +2,32 @@ import * as express from 'express';
 import * as dotenv from 'dotenv';
 import * as httpErrors from 'http-errors';
 import * as crypto from 'crypto';
-import {FirebaseDatabase, Reference} from '@firebase/database-types';
 import {TextNormalizationModel} from './model';
 import {appCheckVerification} from '../middlewares/appcheck.middleware';
+import mongoose, {Document} from 'mongoose';
+
+const NormalizationSchema = new mongoose.Schema({
+  lang: String,
+  input: String,
+  hash: String,
+  output: String,
+  counter: Number,
+  timestamp: Date
+});
+
+interface NormalizationDocument extends Document {
+  lang: string;
+  input: string;
+  hash: string;
+  output: string;
+  counter: number;
+  timestamp: Date;
+}
+
+const NormalizationModel = mongoose.model('Normalization', NormalizationSchema);
 
 export class TextNormalizationEndpoint {
-  constructor(private database: FirebaseDatabase | null, private OpenAIApiKey: string) {}
+  constructor(private OpenAIApiKey: string) {}
 
   private parseParameters(req: express.Request) {
     const lang = req.query.lang as string;
@@ -23,36 +43,21 @@ export class TextNormalizationEndpoint {
     return {lang, text};
   }
 
-  getDBRef(lang: string, text: string): Reference | null {
-    if (!this.database) {
-      return null;
-    }
+  private async getDBRef(lang: string, text: string): Promise<NormalizationDocument | null> {
     const hash = crypto.createHash('md5').update(text).digest('hex');
-    return this.database.ref('normalizations').child(lang).child(hash);
+    return NormalizationModel.findOne({lang, input: text, hash}) as Promise<NormalizationDocument | null>;
   }
 
-  async getCached(lang: string, text: string): Promise<string | Reference | null> {
-    const ref = this.getDBRef(lang, text);
-
-    return new Promise(async resolve => {
-      let result: string | Reference | null = null;
-      if (ref) {
-        await ref.transaction(cache => {
-          if (!cache) {
-            return null;
-          }
-
-          console.log('Cache hit', cache);
-          result = cache.output;
-          return {
-            ...cache,
-            counter: cache.counter + 1,
-            timestamp: Date.now(),
-          };
-        });
-      }
-      resolve(result || null);
-    });
+  async getCached(lang: string, text: string): Promise<string | null> {
+    const cache = await this.getDBRef(lang, text);
+    if (cache) {
+      console.log('Cache hit', cache);
+      cache.counter++;
+      cache.timestamp = new Date();
+      await cache.save();
+      return cache.output;
+    }
+    return null;
   }
 
   async normalize(lang: string, text: string): Promise<string | null> {
@@ -73,24 +78,18 @@ export class TextNormalizationEndpoint {
     } else {
       output = await this.normalize(lang, text);
       // Set cache for the input-output mapping
-      if (cache && output) {
-        await cache.set({
-          input: text,
-          output,
-          counter: 1,
-          timestamp: Date.now(),
-        });
-        // Set cache for the output as well, to map to itself
+      if (output) {
+        output = await this.normalize(lang, text);
         if (output) {
-          const dbRef = this.getDBRef(lang, output);
-          if (dbRef) {
-            await dbRef.set({
-              input: output,
-              output,
-              counter: 0,
-              timestamp: Date.now(),
-            });
-          }
+          const hash = crypto.createHash('md5').update(text).digest('hex');
+          await NormalizationModel.create({
+            lang,
+            input: text,
+            hash,
+            output,
+            counter: 1,
+            timestamp: new Date(),
+          });
         }
       }
     }
@@ -107,6 +106,6 @@ export class TextNormalizationEndpoint {
 dotenv.config();
 const openAIKey = process.env.OPENAI_API_KEY || '';
 export const textNormalizationFunction = express.Router();
-const endpoint = new TextNormalizationEndpoint(null, openAIKey);
+const endpoint = new TextNormalizationEndpoint(openAIKey);
 textNormalizationFunction.use(appCheckVerification);
 textNormalizationFunction.get('/', endpoint.request.bind(endpoint));

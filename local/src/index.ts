@@ -9,6 +9,7 @@ import {textNormalizationFunction} from './text-normalization/controller';
 import {signwritingDescriptionFunction} from './signwriting-description/controller';
 import https from 'https';
 import fs from 'fs';
+import mongooseConnection from './utils/mongo';
 
 dotenv.config();
 logConsoleMemory(process.env.NODE_ENV === 'production' ? console : console);
@@ -34,3 +35,5 @@ const httpsServer = https.createServer({
 httpsServer.listen(PORT, () => {
   console.log(`Server is running on HTTPS port ${PORT}`);
 });
+
+console.log('Initial connection state:', mongooseConnection.readyState);
