@@ -12,7 +12,8 @@ const NormalizationSchema = new mongoose.Schema({
   hash: String,
   output: String,
   counter: Number,
-  timestamp: Date
+  createdAt: Date,
+  updatedAt: Date,
 });
 
 interface NormalizationDocument extends Document {
@@ -21,7 +22,8 @@ interface NormalizationDocument extends Document {
   hash: string;
   output: string;
   counter: number;
-  timestamp: Date;
+  createdAt: Date,
+  updatedAt: Date,
 }
 
 const NormalizationModel = mongoose.model('Normalization', NormalizationSchema);
@@ -53,7 +55,7 @@ export class TextNormalizationEndpoint {
     if (cache) {
       console.log('Cache hit', cache);
       cache.counter++;
-      cache.timestamp = new Date();
+      cache.updatedAt = new Date();
       await cache.save();
       return cache.output;
     }
@@ -88,7 +90,7 @@ export class TextNormalizationEndpoint {
             hash,
             output,
             counter: 1,
-            timestamp: new Date(),
+            createdAt: new Date(),
           });
         }
       }

@@ -9,16 +9,14 @@ const SignwritingDescriptionSchema = new mongoose.Schema({
   fsw: String,
   description: String,
   counter: Number,
-  createdAt: Date,
-  updatedAt: Date,
+  timestamp: Date
 });
 
 interface SignwritingDescriptionDocument extends Document {
   fsw: string;
   description: string;
   counter: number;
-  createdAt: Date,
-  updatedAt: Date,
+  timestamp: Date;
 }
 
 const SignwritingDescriptionModel = mongoose.model('SignwritingDescription', SignwritingDescriptionSchema);
@@ -47,7 +45,7 @@ export class SignwritingDescriptionEndpoint {
     if (cache) {
       console.log('Cache hit', cache);
       cache.counter++;
-      cache.updatedAt = new Date();
+      cache.timestamp = new Date();
       await cache.save();
       return cache.description;
     }
@@ -92,7 +90,7 @@ export class SignwritingDescriptionEndpoint {
           fsw,
           description: output,
           counter: 1,
-          createdAt: new Date(),
+          timestamp: new Date(),
         });
       }
     }
