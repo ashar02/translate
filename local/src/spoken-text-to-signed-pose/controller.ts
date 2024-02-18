@@ -1,111 +1,101 @@
 import * as express from 'express';
 import * as httpErrors from 'http-errors';
-import {appCheckVerification} from '../middlewares/appcheck.middleware';
-import { PythonShell } from 'python-shell';
-import * as path from 'path';
+import axios from 'axios';
 import mongoose, {Document} from 'mongoose';
 
-const SignwritingDescriptionSchema = new mongoose.Schema({
-  fsw: String,
-  description: String,
+const SpokenTextToSignedPoseSchema = new mongoose.Schema({
+  text: String,
+  spoken: String,
+  signed: String,
+  output: String,
   counter: Number,
-  timestamp: Date
+  createdAt: Date,
+  updatedAt: Date,
 });
 
-interface SignwritingDescriptionDocument extends Document {
-  fsw: string;
-  description: string;
-  counter: number;
-  timestamp: Date;
+interface SpokenTextToSignedPoseDocument extends Document {
+  text: string;
+  spoken: string;
+  signed: string;
+  output: string;
+  counter: number,
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const SignwritingDescriptionModel = mongoose.model('SignwritingDescription', SignwritingDescriptionSchema);
+const SpokenTextToSignedPoseModel = mongoose.model('SpokenTextToSignedPose', SpokenTextToSignedPoseSchema);
 
-export class SignwritingDescriptionEndpoint {
+export class SpokenTextToSignedPoseEndpoint {
   private parseParameters(req: express.Request) {
-    if (!req.body || !req.body.data) {
-      throw new httpErrors.BadRequest('Missing data in request body');
+    const {text, spoken, signed} = req.query;
+    if (!text || !spoken || !signed) {
+      throw new httpErrors.BadRequest('Missing required query parameters');
     }
-
-    const data = req.body.data as {fsw: string};
-    if (!data || !data.fsw) {
-      throw new httpErrors.BadRequest('Missing "fsw" data in request body');
-    }
-
-    const fsw = data.fsw;
-    return {fsw};
+    return {text: text as string, spoken: spoken as string, signed: signed as string};
   }
 
-  private async getDBRef(fsw: string): Promise<SignwritingDescriptionDocument | null> {
-    return SignwritingDescriptionModel.findOne({fsw}) as Promise<SignwritingDescriptionDocument | null>;
+  private async getDBRef(text: string, spoken: string, signed: string): Promise<SpokenTextToSignedPoseDocument | null> {
+    return SpokenTextToSignedPoseModel.findOne({text, spoken, signed}) as Promise<SpokenTextToSignedPoseDocument | null>;
   }
 
-  async getCached(fsw: string): Promise<string | null> {
-    const cache = await this.getDBRef(fsw);
+  async getCached(text: string, spoken: string, signed: string): Promise<string | null> {
+    const cache = await this.getDBRef(text, spoken, signed);
     if (cache) {
-      console.log('Cache hit', cache);
+      console.log('Cache hit');
       cache.counter++;
-      cache.timestamp = new Date();
+      cache.updatedAt = new Date();
       await cache.save();
-      return cache.description;
+      return cache.output;
     }
     return null;
   }
 
-  async getDescription(fsw: string): Promise<string | null> {
-    const scriptDirectory = path.join(__dirname, '../../../../signwriting-description/');
-    const scriptPath = path.join(scriptDirectory, 'signwriting_description/gpt_description.py');
-    const options = {
-      mode: 'text' as const,
-      pythonOptions: ['-u'],
-      args: [fsw],
-      cwd: scriptDirectory,
-    };
-  
+  private async getOutputFromAPI(text: string, spoken: string, signed: string): Promise<string | null> {
     try {
-      const result = await PythonShell.run(scriptPath, options);
-      const description = result && result.length > 0 ? result[0] : 'None';
-      return description;
-    } catch (err) {
-      console.error('Error executing Python script:', err);
+      const response = await axios.get(`https://us-central1-sign-mt.cloudfunctions.net/spoken_text_to_signed_pose?text=${text}&spoken=${spoken}&signed=${signed}`);
+      if (response.status === 200) {
+        const data = response.data;
+        return data;
+      } else {
+        console.error('Error in API response:', response.statusText);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error making API request:', error.message);
       return null;
     }
   }
-      
+
   async request(req: express.Request, res: express.Response) {
     res.set('Cache-Control', 'public, max-age=86400, s-maxage=0');
 
-    const {fsw} = this.parseParameters(req);
-    console.log('Requesting', fsw);
+    const {text, spoken, signed} = this.parseParameters(req);
+    console.log('Requesting', text, spoken, signed);
 
-    const cache = await this.getCached(fsw);
+    const cache = await this.getCached(text, spoken, signed);
     let output: string | null;
     if (typeof cache === 'string') {
       output = cache;
     } else {
-      output = await this.getDescription(fsw);
+      output = await this.getOutputFromAPI(text, spoken, signed);
       // Set cache for the input-output mapping
       if (output) {
-        await SignwritingDescriptionModel.create({
-          fsw,
-          description: output,
+        await SpokenTextToSignedPoseModel.create({
+          text,
+          spoken,
+          signed,
+          output,
           counter: 1,
-          timestamp: new Date(),
+          createdAt: new Date(),
         });
       }
     }
 
-    const response = {
-      result: {
-        description: output,
-      },
-    };
-    res.json(response);
-    console.log('Response', response);
+    res.json(output);
+    //console.log('Response', output);
   }
 }
 
-export const signwritingDescriptionFunction = express.Router();
-const endpoint = new SignwritingDescriptionEndpoint();
-signwritingDescriptionFunction.use(appCheckVerification);
-signwritingDescriptionFunction.post('/', endpoint.request.bind(endpoint));
+export const spokenTextToSignedPoseFunction = express.Router();
+const endpoint = new SpokenTextToSignedPoseEndpoint();
+spokenTextToSignedPoseFunction.get('/', endpoint.request.bind(endpoint));

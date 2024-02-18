@@ -8,7 +8,7 @@ import {logConsoleMemory} from './utils/memory';
 import {textNormalizationFunction} from './text-normalization/controller';
 import {signwritingDescriptionFunction} from './signwriting-description/controller';
 import {spokenToSignFunction} from './spoken-to-sign/controller';
-//import {spokenTextToSignedPoseFunction} from './spoken-text-to-signed-pose/controller';
+import {spokenTextToSignedPoseFunction} from './spoken-text-to-signed-pose/controller';
 
 import https from 'https';
 import fs from 'fs';
@@ -30,7 +30,7 @@ app.use('/translate/prerender', prerenderFunction);
 app.use('/api/text-normalization', textNormalizationFunction);
 app.use('/api/signwriting-description', signwritingDescriptionFunction);
 app.use('/demo/signwriting/spoken2sign', spokenToSignFunction);
-//app.use('/spoken_text_to_signed_pose', spokenTextToSignedPoseFunction);
+app.use('/spoken_text_to_signed_pose', spokenTextToSignedPoseFunction);
 
 const httpsServer = https.createServer({
   key: fs.readFileSync(privateKeyPath),
