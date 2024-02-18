@@ -5,6 +5,7 @@ import {HttpClient} from '@angular/common/http';
 import {AssetsService} from '../../core/services/assets/assets.service';
 import {filter, map} from 'rxjs/operators';
 import {ComlinkWorkerInterface, ModelRegistry, TranslationResponse} from '@sign-mt/browsermt';
+import {environment} from '../../../environments/environment';
 
 type TranslationDirection = 'spoken-to-signed' | 'signed-to-spoken';
 
@@ -95,7 +96,10 @@ export class SignWritingTranslationService {
       translations: string[];
     }
 
-    const api = 'https://pub.cl.uzh.ch/demo/signwriting/spoken2sign';
+    let api = 'https://pub.cl.uzh.ch/demo/signwriting/spoken2sign';
+    if (this.isOwnPage() === true) {
+      api = `${environment.apiBaseUrl}/demo/signwriting/spoken2sign`;
+    }
     const body = {
       country_code: to,
       language_code: from,
@@ -128,6 +132,11 @@ export class SignWritingTranslationService {
       filter(() => !('navigator' in globalThis) || navigator.onLine),
       catchError(online)
     );
+  }
+
+  private isOwnPage(): boolean {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.has('own') && urlParams.get('own') === 'true';
   }
 
   preProcessSpokenText(text: string) {

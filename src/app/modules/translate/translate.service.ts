@@ -3,7 +3,7 @@ import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 import {GlobalFeatureFlagService} from 'src/app/features/services/feature-control-flag.service';
-import { environment } from '../../../environments/environment';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -194,7 +194,15 @@ export class TranslationService {
   }
 
   translateSpokenToSigned(text: string, spokenLanguage: string, signedLanguage: string): string {
-    const api = 'https://us-central1-sign-mt.cloudfunctions.net/spoken_text_to_signed_pose';
+    let api = 'https://us-central1-sign-mt.cloudfunctions.net/spoken_text_to_signed_pose';
+    if (this.isOwnPage() === true) {
+      api = `${this.baseUrl}/spoken_text_to_signed_pose`;
+    }
     return `${api}?text=${encodeURIComponent(text)}&spoken=${spokenLanguage}&signed=${signedLanguage}`;
+  }
+
+  private isOwnPage(): boolean {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.has('own') && urlParams.get('own') === 'true';
   }
 }
