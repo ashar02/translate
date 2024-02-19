@@ -29,7 +29,7 @@ export const environment = {
     textLanguages: ['en'],
     signedLanguages: ['ase', 'csl', 'pks'],
   },
-  apiBaseUrl: 'http://localhost:3001',
+  apiBaseUrl: 'https://localhost:3001',
 };
 
 /*
