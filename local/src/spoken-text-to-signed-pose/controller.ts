@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as httpErrors from 'http-errors';
 import axios, {AxiosResponse} from 'axios';
 import mongoose, {Document} from 'mongoose';
+import https from 'https';
 
 const SpokenTextToSignedPoseSchema = new mongoose.Schema({
   text: String,
@@ -61,11 +62,17 @@ export class SpokenTextToSignedPoseEndpoint {
     return {data: null, content_disposition: null, content_type: null, glosses: null};
   }
 
-  private async getOutputFromAPI(text: string, spoken: string, signed: string): Promise<{data: Buffer | null, content_disposition: string | null, content_type: string | null, glosses: string | null}> {
+  private async getOutputFromAPI(text: string, spoken: string, signed: string, myown: boolean): Promise<{data: Buffer | null, content_disposition: string | null, content_type: string | null, glosses: string | null}> {
     try {
-      //const response = await axios.get(`https://us-central1-sign-mt.cloudfunctions.net/spoken_text_to_signed_pose?text=${text}&spoken=${spoken}&signed=${signed}`);
-      const response: AxiosResponse<ArrayBuffer> = await axios.get(`https://us-central1-sign-mt.cloudfunctions.net/spoken_text_to_signed_pose?text=${text}&spoken=${spoken}&signed=${signed}`, {
-        responseType: 'arraybuffer'
+      let baseUrl = 'https://us-central1-sign-mt.cloudfunctions.net';
+      if (myown) {
+        baseUrl = 'https://127.0.0.1:3002';
+      }
+      const axiosInstance = axios.create({
+        httpsAgent: new https.Agent({ rejectUnauthorized: false })
+      });
+      const response: AxiosResponse<ArrayBuffer> = await axiosInstance.get(`${baseUrl}/spoken_text_to_signed_pose?text=${text}&spoken=${spoken}&signed=${signed}`, {
+        responseType: 'arraybuffer',
       });
       if (response.status === 200) {
         return {
@@ -88,6 +95,7 @@ export class SpokenTextToSignedPoseEndpoint {
     res.set('Cache-Control', 'public, max-age=86400, s-maxage=0');
 
     const {text, spoken, signed} = this.parseParameters(req);
+    const myown = req.query['myown'] === 'true';
     console.log('Requesting', text, spoken, signed);
 
     const cache = await this.getCached(text, spoken, signed);
@@ -99,7 +107,7 @@ export class SpokenTextToSignedPoseEndpoint {
       headers.content_type = cache.content_type || '';
       headers.glosses = cache.glosses || '';
     } else {
-      const apiResponse = await this.getOutputFromAPI(text, spoken, signed);
+      const apiResponse = await this.getOutputFromAPI(text, spoken, signed, myown);
       if (apiResponse && apiResponse.data) {
         output = apiResponse.data;
         headers.content_disposition = apiResponse.content_disposition || '';
