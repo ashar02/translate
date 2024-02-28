@@ -195,14 +195,23 @@ export class TranslationService {
 
   translateSpokenToSigned(text: string, spokenLanguage: string, signedLanguage: string): string {
     let api = 'https://us-central1-sign-mt.cloudfunctions.net/spoken_text_to_signed_pose';
-    if (this.isOwnPage() === true) {
+    if (this.isMyOwnPage() === true || this.isOwnPage() === true) {
       api = `${this.baseUrl}/spoken_text_to_signed_pose`;
     }
-    return `${api}?text=${encodeURIComponent(text)}&spoken=${spokenLanguage}&signed=${signedLanguage}`;
+    let url = `${api}?text=${encodeURIComponent(text)}&spoken=${spokenLanguage}&signed=${signedLanguage}`;
+    if (this.isMyOwnPage() === true) {
+      url += '&myown=true';
+    }
+    return url;
   }
 
   private isOwnPage(): boolean {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.has('own') && urlParams.get('own') === 'true';
+  }
+
+  private isMyOwnPage(): boolean {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.has('myown') && urlParams.get('myown') === 'true';
   }
 }
