@@ -97,7 +97,7 @@ export class SignWritingTranslationService {
     }
 
     let api = 'https://pub.cl.uzh.ch/demo/signwriting/spoken2sign';
-    if (this.isOwnPage() === true) {
+    if (this.isOwnPage() === true || this.isMyOwnPage() == true) {
       api = `${environment.apiBaseUrl}/demo/signwriting/spoken2sign`;
     }
     const body = {
@@ -137,6 +137,11 @@ export class SignWritingTranslationService {
   private isOwnPage(): boolean {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.has('own') && urlParams.get('own') === 'true';
+  }
+
+  private isMyOwnPage(): boolean {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.has('myown') && urlParams.get('myown') === 'true';
   }
 
   preProcessSpokenText(text: string) {
