@@ -87,7 +87,7 @@ export class SpokenTextToSignedPoseEndpoint {
       }
     } catch (error) {
       console.error('Error making API request:', error.message);
-      return {data: null, content_disposition: null, content_type: null, glosses: null};
+      return {data: null, content_disposition: null, content_type: null, glosses: JSON.parse(error.response.data)};
     }
   }
 
@@ -127,6 +127,7 @@ export class SpokenTextToSignedPoseEndpoint {
         });
       } else {
         output = null;
+        headers.glosses = apiResponse.glosses || '';
       }
     }
 
@@ -136,7 +137,11 @@ export class SpokenTextToSignedPoseEndpoint {
       res.set('Glosses', headers.glosses);
       res.end(output);
     } else {
-      res.status(500).json({ error: 'Failed to retrieve output from API' });
+      if (headers.glosses) {
+        res.status(500).json({message: headers.glosses});
+      } else {
+        res.status(500).json({message: 'Failed to retrieve output from API'});
+      }
     }
   }
 }
