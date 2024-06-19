@@ -1,6 +1,6 @@
 import {Injectable, PLATFORM_ID, Inject} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
-import {getCLS, getFID, getLCP} from 'web-vitals';
+import {onCLS, onINP, onLCP} from 'web-vitals';
 //import {FirebaseAnalytics} from '@capacitor-firebase/analytics';
 //import {FirebasePerformance} from '@capacitor-firebase/performance';
 import {environment} from '../../../../environments/environment';
@@ -80,9 +80,9 @@ export class GoogleAnalyticsService {
       });
     };
 
-    getCLS(sendToGoogleAnalytics);
-    getFID(sendToGoogleAnalytics);
-    getLCP(sendToGoogleAnalytics);
+    onCLS(sendToGoogleAnalytics);
+    onINP(sendToGoogleAnalytics);
+    onLCP(sendToGoogleAnalytics);
   }
 
   async trace<T>(timingCategory: string, timingVar: string, callable: () => T): Promise<T> {
