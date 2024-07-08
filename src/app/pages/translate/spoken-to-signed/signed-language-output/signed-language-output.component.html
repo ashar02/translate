@@ -16,8 +16,8 @@
 <app-human-pose-viewer [src]="pose" />
 } @else if (poseViewerSetting === 'avatar') {
 <app-avatar-pose-viewer [src]="pose" />
-} } } } @if (globalFeatureFlagService.getEnableSignLanguageViewSelector() && (pose$ | async; as pose)) {
-<div class="actions-row">
+} } } } @if (pose$ | async; as pose) {
+<div class="actions-row" *ngIf="globalFeatureFlagService.getEnableSignLanguageViewSelector()">
   @if (videoUrl) {
   <ion-button
     class="circle-icon"
