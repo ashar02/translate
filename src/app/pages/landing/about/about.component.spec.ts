@@ -4,7 +4,6 @@ import {axe, toHaveNoViolations} from 'jasmine-axe';
 import {AboutComponent} from './about.component';
 import {AboutHeroComponent} from './about-hero/about-hero.component';
 import {AboutDirectionComponent} from './about-direction/about-direction.component';
-import {AboutOfflineComponent} from './about-offline/about-offline.component';
 import {StoresComponent} from '../../../components/stores/stores.component';
 import {AppTranslocoTestingModule} from '../../../core/modules/transloco/transloco-testing.module';
 import {AboutAppearanceComponent} from './about-appearance/about-appearance.component';
@@ -15,6 +14,11 @@ import {SettingsPageModule} from '../../settings/settings.module';
 import {IonicModule} from '@ionic/angular';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatTabsModule} from '@angular/material/tabs';
+import {AboutObjectivesComponent} from './about-objectives/about-objectives.component';
+import {AboutFaqComponent} from './about-faq/about-faq.component';
+import {AboutCustomersComponent} from './about-customers/about-customers.component';
+import {AboutTeamComponent} from './about-team/about-team.component';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('AboutComponent', () => {
   let component: AboutComponent;
@@ -26,10 +30,13 @@ describe('AboutComponent', () => {
         AboutComponent,
         AboutHeroComponent,
         AboutAppearanceComponent,
+        AboutObjectivesComponent,
+        AboutFaqComponent,
+        AboutCustomersComponent,
+        AboutTeamComponent,
         AboutBenefitsComponent,
         AboutDirectionComponent,
         AboutApiComponent,
-        AboutOfflineComponent,
         StoresComponent,
       ],
       imports: [
@@ -37,6 +44,7 @@ describe('AboutComponent', () => {
         MatTooltipModule,
         MatTabsModule,
         IonicModule.forRoot(),
+        NoopAnimationsModule,
         AppNgxsModule,
         SettingsPageModule,
       ],
