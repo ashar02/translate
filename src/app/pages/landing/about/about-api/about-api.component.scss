@@ -12,7 +12,12 @@
     }
 
     &.video-container {
-      max-width: 512px;
+      background: var(--ion-color-light);
+      display: flex;
+      align-items: center;
+      @media #{$breakpoint-lt-sm} {
+        max-width: 512px;
+      }
     }
   }
 }
@@ -26,15 +31,11 @@ pre {
 }
 
 video {
-  background: var(--ion-color-light);
   display: block;
-  max-width: 512px;
+  margin: auto;
   width: 100%;
   aspect-ratio: 1 / 1;
-}
-
-ion-button {
-  text-transform: none;
+  max-width: 512px;
 }
 
 .container {
